@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heart Collection</title>
+  <!-- SEO & Responsive Tags -->
+  <meta name="description" content="An interactive memory trail of beautiful moments.">
+  <!-- Fonts: Great Vibes (Love/Cursive), Outfit (UI), Playfair Display (Headers), Caveat (Handwritten notes) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Great+Vibes&family=Outfit:wght@300;400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+    rel="stylesheet">
+
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="main.css?v=22">
+
+  <!-- GSAP CDN for high-performance trail animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <!-- HEIC conversion library for Apple Photos -->
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+</head>
+
+<body class="dark-mode">
+
+  <!-- Persistent Butterflies Background container -->
+  <div id="butterflies-bg"></div>
+
+  <!-- Ambient background glow elements (hidden for clean B&W theme) -->
+  <div class="ambient-glow bg-glow-1"></div>
+  <div class="ambient-glow bg-glow-2"></div>
+
+  <!-- Music Controller Group -->
+  <div id="music-controller" class="music-controller-group hidden">
+    <button id="music-toggle" class="music-btn" aria-label="Toggle Music">
+      <span class="music-icon">🎵</span>
+      <span class="music-text">Muted</span>
+    </button>
+    <button id="music-next" class="music-btn" style="border-radius: 50%; padding: 10px;" aria-label="Next Song">
+      <span class="music-icon" style="margin: 0;">⏭️</span>
+    </button>
+  </div>
+
+  <!-- PAGE 1: Lamp Screen (Dark Mode, Lamp Only) -->
+  <section id="lamp-screen" class="fullscreen-container">
+    <!-- Hanging Lamp -->
+    <div class="hanging-lamp" id="intro-lamp" title="Click to turn on the light">
+      <div class="lamp-wire"></div>
+      <div class="lamp-shade-container">
+        <div class="lamp-shade"></div>
+        <div class="lamp-bulb"></div>
+      </div>
+      <div class="lamp-glow-effect"></div>
+    </div>
+  </section>
+
+  <!-- PAGE 2: Rainbow & Caption Screen (Light Mode, Rainbow & Caption Only) -->
+  <section id="rainbow-screen" class="fullscreen-container hidden">
+    <!-- Diagonal Rainbow Overlay -->
+    <div id="rainbow-overlay"></div>
+
+    <div class="caption-container">
+      <h2 class="lamp-caption-text">this is how you light up my world</h2>
+      <p class="lamp-click-hint">Click anywhere to continue...</p>
+    </div>
+  </section>
+
+  <!-- PAGE 3: Landing Page with Butterflies WebGL Background -->
+  <main id="app" class="fullscreen-container hidden">
+    <div class="intro-card glassmorphism hidden-opacity" id="intro-card">
+      <div class="heart-icon-wrapper">
+        <svg class="heart-pulse" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 29s-13-7.5-13-16c0-4.5 3.5-8 8-8 3.5 0 5 2 5 2s1.5-2 5-2c4.5 0 8 3.5 8 8 0 8.5-13 16-13 16z"
+            fill="var(--heart-red)" />
+        </svg>
+      </div>
+
+      <!-- Typist container -->
+      <h1 id="intro-title" class="typing-text"></h1>
+
+      <!-- Hidden form which reveals after typing -->
+      <form id="name-form" class="name-entry-form hidden-opacity">
+        <div class="input-group">
+          <input type="text" id="name-input" placeholder="Your name..." required autocomplete="off">
+          <span class="input-border-glow"></span>
+        </div>
+        <button type="submit" class="enter-btn">
+          <span>Enter</span>
+          <svg viewBox="0 0 24 24" class="arrow-icon">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" fill="none" />
+          </svg>
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- SCREEN 1.5: Security Check Page -->
+  <section id="security-screen" class="fullscreen-container hidden">
+    <div class="security-card glassmorphism">
+      <div class="security-lock-icon">🔒</div>
+      <h2 class="security-title">Security Verification</h2>
+      <p class="security-subtitle">Select the right one</p>
+      <p class="security-question">According to you what should i think you in these choice?</p>
+
+      <div class="security-options">
+        <button type="button" class="security-option-btn" data-choice="World">World</button>
+        <button type="button" class="security-option-btn" data-choice="Life">Life</button>
+        <button type="button" class="security-option-btn" data-choice="Lover">Lover</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sweet Message Modal (Envelope Presentation) -->
+  <div id="security-modal" class="modal hidden">
+    <div class="envlope-wrapper">
+      <div id="envelope" class="close">
+        <div class="front flap"></div>
+        <div class="front pocket"></div>
+        <div class="envelope-seal">
+          <svg viewBox="0 0 32 32" class="heart-seal-svg">
+            <path d="M16 28.21s-12-7.44-12-14.88A6.06 6.06 0 0 1 10.08 7.3 6 6 0 0 1 16 11.23 6 6 0 0 1 21.92 7.3 6.06 6.06 0 0 1 28 13.33c0 7.44-12 14.88-12 14.88z"/>
+          </svg>
+        </div>
+        <div class="letter">
+          <span class="letter-heart">❤️</span>
+          <p class="sweet-message">“first of all you are not choice to me. according to me I want two 'fe' to live which
+            one is: one is life, another one is wife, and you are both to me, you are the world to me and everything”
+          </p>
+          <p class="letter-click-hint" style="animation: softPulse 2.5s infinite ease-in-out;">Click anywhere to enter
+            the album...</p>
+        </div>
+        <div class="hearts">
+          <div class="heart a1"></div>
+          <div class="heart a2"></div>
+          <div class="heart a3"></div>
+        </div>
+      </div>
+      <div class="envelope-tap-hint" id="envelope-tap-hint">Click the envelope to open...</div>
+    </div>
+  </div>
+
+
+
+  <!-- SCREEN 3: Home Page (3D Book Cover Entry) -->
+  <section id="home-screen" class="fullscreen-container hidden">
+    <div class="book-container">
+      <div class="book-cover-wrapper" id="book-cover-wrapper">
+
+        <!-- Book Spine Structure -->
+        <div class="book-spine"></div>
+
+        <!-- Front Cover Page (Swings open 3D) -->
+        <div class="book-cover-sheet" id="book-cover-sheet">
+          <div class="cover-design">
+            <span class="cover-badge">Interactive Album</span>
+            <h2 class="cover-title">Heart Collection</h2>
+            <div class="cover-divider"></div>
+            <p class="cover-subtitle">Prepared for <span id="user-display-name">you</span></p>
+            <div class="heart-seal">❤️</div>
+            <p class="cover-hint">Click the cover to open...</p>
+          </div>
+        </div>
+
+        <!-- Inside placeholder sheet (visible when cover turns) -->
+        <div class="book-inside-sheet">
+          <div class="inside-design">
+            <div class="spinner"></div>
+            <span class="opening-text">Opening Album...</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 4: Fullscreen Polaroid Trail Area (Direct image presentation, no book bounds) -->
+  <section id="trail-screen" class="fullscreen-container hidden">
+    <!-- Vibe Selector Card (Set song and unlock photos) -->
+    <div id="vibe-selector-screen" class="vibe-selector-container">
+      <div class="vibe-card glassmorphism">
+        <h3 class="vibe-title">Choose Your Vibe</h3>
+        <p class="vibe-subtitle">Select a heart to unlock our memories...</p>
+        <div class="vibe-hearts-container">
+          <button class="vibe-heart-btn" data-track-index="0" aria-label="Grey Heart Vibe">
+            <span class="vibe-emoji">🩶</span>
+          </button>
+          <button class="vibe-heart-btn" data-track-index="1" aria-label="Green Heart Vibe">
+            <span class="vibe-emoji">💚</span>
+          </button>
+          <button class="vibe-heart-btn" data-track-index="2" aria-label="Blue Heart Vibe">
+            <span class="vibe-emoji">💙</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="trail-container" class="content trail-fullscreen">
+      <!-- Dynamically loaded trailing polaroids will be appended here -->
+
+      <!-- Hover / Swipe instructions overlay -->
+      <div class="trail-instructions" id="instructions">
+        <div class="indicator-hand">✨</div>
+        <p>Move your mouse or drag your finger across the screen to scatter our memories...</p>
+      </div>
+    </div>
+
+    <!-- Minimal B&W Toolbar -->
+    <div class="minimal-toolbar glassmorphism">
+      <span>📸 Heart Collection Trail</span>
+      <div class="toolbar-actions">
+        <button id="btn-reset" class="action-btn-black">Clear Board</button>
+        <button id="btn-home" class="action-btn-black">Close Album</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Image Modal -->
+  <div id="image-modal" class="modal hidden">
+    <span class="modal-close">&times;</span>
+    <img class="modal-content" id="modal-img" alt="Zoomed view">
+    <div id="modal-caption" class="modal-caption"></div>
+  </div>
+
+  <!-- JavaScript Entry Point -->
+  <script src="main.js?v=22"></script>
+
+  <!-- Butterflies Background Module Initialization -->
+  <script type="module">
+    import { butterfliesBackground } from 'https://unpkg.com/threejs-toys@0.0.7/build/threejs-toys.module.cdn.min.js'
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const butterfliesBg = document.getElementById('butterflies-bg');
+      if (butterfliesBg) {
+        butterfliesBackground({
+          el: butterfliesBg,
+          eventsEl: butterfliesBg, // Avoid listening on document.body to prevent event hijacking
+          gpgpuSize: 32,
+          background: 0xffffff, // White background for the butterflies
+          material: 'basic',
+          materialParams: { transparent: true, alphaTest: 0.5 },
+          texture: 'https://assets.codepen.io/33787/butterflies.png',
+          textureCount: 4,
+          wingsScale: [1, 1, 1],
+          wingsWidthSegments: 8,
+          wingsHeightSegments: 8,
+          wingsSpeed: 0.75,
+          wingsDisplacementScale: 1.25,
+          noiseCoordScale: 0.01,
+          noiseTimeCoef: 0.0005,
+          noiseIntensity: 0.0025,
+          attractionRadius1: 100,
+          attractionRadius2: 150,
+          maxVelocity: 0.1
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>
