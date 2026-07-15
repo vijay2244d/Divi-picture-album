@@ -114,6 +114,19 @@
     </div>
   </section>
 
+  <!-- SCREEN 1.75: Verifying Answer Screen -->
+  <section id="verifying-screen" class="fullscreen-container hidden">
+    <div class="security-card glassmorphism">
+      <div class="security-lock-icon">🔍</div>
+      <h2 class="security-title">Checking Answer...</h2>
+      <p class="security-subtitle">Verification in progress</p>
+      <p class="security-question" style="font-family: 'Outfit', sans-serif; font-style: normal; font-size: 1.15rem; margin-top: 15px;">
+        Let's see if your answer is correct or not...
+      </p>
+      <div class="spinner" style="margin: 20px auto 0; width: 40px; height: 40px; border-width: 4px; border-left-color: var(--heart-red);"></div>
+    </div>
+  </section>
+
   <!-- Sweet Message Modal (Envelope Presentation) -->
   <div id="security-modal" class="modal hidden">
     <div class="envlope-wrapper">
@@ -223,6 +236,15 @@
     <span class="modal-close">&times;</span>
     <img class="modal-content" id="modal-img" alt="Zoomed view">
     <div id="modal-caption" class="modal-caption"></div>
+  </div>
+
+  <!-- Page Transition Overlay -->
+  <div id="transition-overlay" class="transition-overlay">
+    <div class="transition-curtain top-curtain"></div>
+    <div class="transition-curtain bottom-curtain"></div>
+    <div class="transition-heart-wrapper">
+      <div class="transition-heart-pulse">❤️</div>
+    </div>
   </div>
 
   <!-- JavaScript Entry Point -->

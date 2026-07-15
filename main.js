@@ -237,6 +237,131 @@ const modalClose = document.querySelector(".modal-close");
 // HEIC conversion Cache to prevent multiple loads
 const heicCache = {};
 
+// Centralized GSAP Page Transition Helper
+function transitionPages(fromScreen, toScreen, onMidpoint, type = "curtain") {
+  const overlay = document.getElementById("transition-overlay");
+  if (!overlay) {
+    if (onMidpoint) onMidpoint();
+    if (toScreen) {
+      toScreen.classList.remove("hidden");
+      animateEntrance(toScreen);
+    }
+    return;
+  }
+
+  const topCurtain = overlay.querySelector(".top-curtain");
+  const bottomCurtain = overlay.querySelector(".bottom-curtain");
+  const heartWrapper = overlay.querySelector(".transition-heart-wrapper");
+
+  if (type === "fade") {
+    const tl = gsap.timeline();
+    overlay.style.pointerEvents = "auto";
+    
+    if (fromScreen) {
+      tl.to(fromScreen, {
+        opacity: 0,
+        y: -15,
+        duration: 0.5,
+        ease: "power2.inOut",
+        onComplete: () => {
+          fromScreen.classList.add("hidden");
+          gsap.set(fromScreen, { y: 0 });
+        }
+      });
+    }
+    
+    tl.add(() => {
+      if (onMidpoint) onMidpoint();
+      if (toScreen) {
+        toScreen.classList.remove("hidden");
+        gsap.set(toScreen, { opacity: 0, y: 15 });
+      }
+    });
+
+    if (toScreen) {
+      tl.to(toScreen, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power2.out",
+        onStart: () => {
+          animateEntrance(toScreen);
+        }
+      });
+    }
+    
+    tl.add(() => {
+      overlay.style.pointerEvents = "none";
+    });
+    
+    return;
+  }
+
+  overlay.style.pointerEvents = "auto";
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      overlay.style.pointerEvents = "none";
+    }
+  });
+
+  tl.to([topCurtain, bottomCurtain], {
+    y: "0%",
+    duration: 0.6,
+    ease: "power3.inOut"
+  })
+  .to(heartWrapper, {
+    opacity: 1,
+    scale: 1,
+    duration: 0.4,
+    ease: "back.out(1.7)"
+  }, "-=0.2")
+  .to(heartWrapper, {
+    scale: 1.1,
+    duration: 0.2
+  })
+  .add(() => {
+    if (onMidpoint) {
+      onMidpoint();
+    }
+    if (toScreen) {
+      animateEntrance(toScreen);
+    }
+  })
+  .to(heartWrapper, {
+    scale: 0,
+    opacity: 0,
+    duration: 0.4,
+    ease: "power2.in"
+  })
+  .to(topCurtain, {
+    y: "-100%",
+    duration: 0.6,
+    ease: "power3.inOut"
+  }, "-=0.2")
+  .to(bottomCurtain, {
+    y: "100%",
+    duration: 0.6,
+    ease: "power3.inOut"
+  }, "<");
+}
+
+// Staggered Entrance Animation helper
+function animateEntrance(container) {
+  if (!container) return;
+  const card = container.querySelector(".intro-card, .security-card, .vibe-card, .book-container, .caption-container");
+  if (card) {
+    const childs = card.querySelectorAll("h1, h2, h3, p, form, .input-group, button, .vibe-hearts-container, .security-options");
+    if (childs.length > 0) {
+      gsap.killTweensOf(childs);
+      gsap.fromTo(childs, 
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power2.out" }
+      );
+    }
+  }
+}
+
 // 2. INTRO TYPING ANIMATION
 const introPhrase = "knock knock, who's this?";
 let introCharIndex = 0;
@@ -470,17 +595,17 @@ if (nameForm) {
       userDisplayName.textContent = currentUserName;
     }
     
-    if (introScreen) {
-      introScreen.style.opacity = '0';
-    }
-    
-    setTimeout(() => {
+    const securityScreen = document.getElementById("security-screen");
+    transitionPages(introScreen, securityScreen, () => {
       if (introScreen) {
         introScreen.classList.add("hidden");
         introScreen.style.display = 'none'; // Fully remove from layout
       }
-      showSecurityScreen();
-    }, 900);
+      if (securityScreen) {
+        securityScreen.classList.remove("hidden");
+        securityScreen.style.opacity = '1';
+      }
+    });
   });
 }
 
@@ -505,16 +630,14 @@ function proceedToAlbum() {
   isProceeding = true;
   
   if (securityModal) {
-    securityModal.classList.add("hidden");
-  }
-  
-  const securityScreen = document.getElementById("security-screen");
-  if (securityScreen) {
-    securityScreen.style.opacity = '0';
-    setTimeout(() => {
-      securityScreen.classList.add("hidden");
-      transitionToHomeScreen();
-    }, 800);
+    transitionPages(securityModal, homeScreen, () => {
+      securityModal.classList.add("hidden");
+      securityModal.style.opacity = '0';
+      if (homeScreen) {
+        homeScreen.classList.remove("hidden");
+        homeScreen.style.opacity = '1';
+      }
+    }, "fade");
   }
 }
 
@@ -522,15 +645,39 @@ const envelope = document.getElementById("envelope");
 
 securityOptionBtns.forEach(btn => {
   btn.addEventListener("click", () => {
-    if (securityModal) {
-      securityModal.classList.remove("hidden");
-      
-      // Ensure the envelope is closed initially
-      if (envelope) {
-        envelope.classList.remove("open");
-        envelope.classList.add("close");
+    const securityScreen = document.getElementById("security-screen");
+    const verifyingScreen = document.getElementById("verifying-screen");
+    
+    transitionPages(securityScreen, verifyingScreen, () => {
+      if (securityScreen) {
+        securityScreen.classList.add("hidden");
+        securityScreen.style.opacity = '0';
       }
-    }
+      if (verifyingScreen) {
+        verifyingScreen.classList.remove("hidden");
+        verifyingScreen.style.opacity = '1';
+      }
+    });
+
+    // After 2.8 seconds, transition to the envelope modal
+    setTimeout(() => {
+      transitionPages(verifyingScreen, securityModal, () => {
+        if (verifyingScreen) {
+          verifyingScreen.classList.add("hidden");
+          verifyingScreen.style.opacity = '0';
+        }
+        if (securityModal) {
+          securityModal.classList.remove("hidden");
+          securityModal.style.opacity = '1';
+          
+          // Ensure the envelope is closed initially
+          if (envelope) {
+            envelope.classList.remove("open");
+            envelope.classList.add("close");
+          }
+        }
+      }, "fade");
+    }, 2800);
   });
 });
 
@@ -686,14 +833,14 @@ if (coverSheet) {
     
     // 2. Wait 1.1 seconds for 3D flip visual completion, then transition
     setTimeout(() => {
-      if (homeScreen) {
-        homeScreen.style.opacity = '0';
-        setTimeout(() => homeScreen.classList.add("hidden"), 800);
-      }
-      
-      if (trailScreen) {
-        trailScreen.classList.remove("hidden");
-        setTimeout(() => {
+      transitionPages(homeScreen, trailScreen, () => {
+        if (homeScreen) {
+          homeScreen.style.opacity = '0';
+          homeScreen.classList.add("hidden");
+        }
+        
+        if (trailScreen) {
+          trailScreen.classList.remove("hidden");
           trailScreen.style.opacity = '1';
           
           // Make sure the vibe selector screen is visible initially
@@ -711,8 +858,8 @@ if (coverSheet) {
           if (!trailInstance && trailContainer) {
             trailInstance = new ImageTrailVariant7(trailContainer);
           }
-        }, 100);
-      }
+        }
+      }, "fade");
     }, 1100);
   });
 }
@@ -763,39 +910,36 @@ vibeHeartBtns.forEach(btn => {
 // Close Album: Go back to Home Book screen
 if (btnHome) {
   btnHome.addEventListener("click", () => {
-    // Fade out trail screen
-    if (trailScreen) {
-      trailScreen.style.opacity = '0';
-      setTimeout(() => trailScreen.classList.add("hidden"), 800);
-    }
-
-    // Pause background music when leaving the album
-    if (musicPlaying && bgMusic) {
-      bgMusic.pause();
-      musicPlaying = false;
-      if (musicToggle) {
-        musicToggle.querySelector(".music-text").textContent = "Muted";
-        musicToggle.classList.remove("active");
+    transitionPages(trailScreen, homeScreen, () => {
+      // Pause background music when leaving the album
+      if (musicPlaying && bgMusic) {
+        bgMusic.pause();
+        musicPlaying = false;
+        if (musicToggle) {
+          musicToggle.querySelector(".music-text").textContent = "Muted";
+          musicToggle.classList.remove("active");
+        }
       }
-    }
 
-    // Reset cover sheet flip state
-    if (coverSheet) {
-      coverSheet.classList.remove("flipped");
-    }
+      // Reset cover sheet flip state
+      if (coverSheet) {
+        coverSheet.classList.remove("flipped");
+      }
 
-    // Clear active polaroids
-    if (trailInstance) {
-      trailInstance.clearAll();
-    }
+      // Clear active polaroids
+      if (trailInstance) {
+        trailInstance.clearAll();
+      }
 
-    // Fade in Home Screen with closed book
-    if (homeScreen) {
-      homeScreen.classList.remove("hidden");
-      setTimeout(() => {
+      if (trailScreen) {
+        trailScreen.style.opacity = '0';
+        trailScreen.classList.add("hidden");
+      }
+      if (homeScreen) {
+        homeScreen.classList.remove("hidden");
         homeScreen.style.opacity = '1';
-      }, 100);
-    }
+      }
+    }, "fade");
   });
 }
 
@@ -1135,31 +1279,35 @@ if (introLamp && rainbowOverlay) {
     
     // 3. Fade out Page 1 (lamp screen) and show Page 2 (rainbow screen)
     setTimeout(() => {
-      if (lampScreen) {
-        lampScreen.style.opacity = "0";
-        lampScreen.style.visibility = "hidden";
-      }
-      
-      if (rainbowScreen) {
-        rainbowScreen.classList.remove("hidden");
+      transitionPages(lampScreen, rainbowScreen, () => {
+        if (lampScreen) {
+          lampScreen.style.opacity = "0";
+          lampScreen.style.visibility = "hidden";
+        }
         
-        // Start the rainbow sweep animation
-        rainbowOverlay.classList.add("playing");
-        
-        const handleRainbowEnd = () => {
-          rainbowScreen.classList.add("caption-active");
-          rainbowOverlay.removeEventListener("animationend", handleRainbowEnd);
-        };
-        
-        rainbowOverlay.addEventListener("animationend", handleRainbowEnd);
-        
-        // Safety fallback if animationend event doesn't fire
-        setTimeout(() => {
-          if (!rainbowScreen.classList.contains("caption-active")) {
-            handleRainbowEnd();
-          }
-        }, 3600);
-      }
+        if (rainbowScreen) {
+          rainbowScreen.classList.remove("hidden");
+          rainbowScreen.style.opacity = "1";
+          rainbowScreen.style.visibility = "visible";
+          
+          // Start the rainbow sweep animation
+          rainbowOverlay.classList.add("playing");
+          
+          const handleRainbowEnd = () => {
+            rainbowScreen.classList.add("caption-active");
+            rainbowOverlay.removeEventListener("animationend", handleRainbowEnd);
+          };
+          
+          rainbowOverlay.addEventListener("animationend", handleRainbowEnd);
+          
+          // Safety fallback if animationend event doesn't fire
+          setTimeout(() => {
+            if (!rainbowScreen.classList.contains("caption-active")) {
+              handleRainbowEnd();
+            }
+          }, 3600);
+        }
+      }, "fade");
     }, 600);
   });
 }
@@ -1169,12 +1317,12 @@ if (rainbowScreen) {
   rainbowScreen.addEventListener("click", () => {
     // Only allow transition if the caption is fully displayed (caption-active)
     if (rainbowScreen.classList.contains("caption-active")) {
-      // Fade out Page 2 (rainbow screen)
-      rainbowScreen.style.opacity = "0";
-      rainbowScreen.style.visibility = "hidden";
-      
-      setTimeout(() => {
-        rainbowScreen.classList.add("hidden");
+      transitionPages(rainbowScreen, introScreen, () => {
+        if (rainbowScreen) {
+          rainbowScreen.style.opacity = "0";
+          rainbowScreen.style.visibility = "hidden";
+          rainbowScreen.classList.add("hidden");
+        }
         
         // Activate butterflies WebGL background
         if (butterfliesBg) {
@@ -1184,6 +1332,7 @@ if (rainbowScreen) {
         // Show the main landing screen (Page 3)
         if (introScreen) {
           introScreen.classList.remove("hidden");
+          introScreen.style.opacity = "1";
         }
         
         // Reveal the intro name-input card
@@ -1198,7 +1347,7 @@ if (rainbowScreen) {
           introStarted = true;
           setTimeout(typeIntroText, 400);
         }
-      }, 1000);
+      });
     }
   });
 }
