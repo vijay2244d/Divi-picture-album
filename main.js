@@ -1263,11 +1263,10 @@ if (imageModal) {
 const introLamp = document.getElementById("intro-lamp");
 const rainbowOverlay = document.getElementById("rainbow-overlay");
 const lampScreen = document.getElementById("lamp-screen");
-const rainbowScreen = document.getElementById("rainbow-screen");
 const butterfliesBg = document.getElementById("butterflies-bg");
 let introStarted = false;
 
-if (introLamp && rainbowOverlay) {
+if (introLamp) {
   introLamp.addEventListener("click", (e) => {
     e.stopPropagation();
     
@@ -1277,51 +1276,13 @@ if (introLamp && rainbowOverlay) {
     // 2. Transition body to light mode
     document.body.classList.remove("dark-mode");
     
-    // 3. Fade out Page 1 (lamp screen) and show Page 2 (rainbow screen)
+    // 3. Transition directly from lampScreen to introScreen (Page 3)
     setTimeout(() => {
-      transitionPages(lampScreen, rainbowScreen, () => {
+      transitionPages(lampScreen, introScreen, () => {
         if (lampScreen) {
           lampScreen.style.opacity = "0";
           lampScreen.style.visibility = "hidden";
-        }
-        
-        if (rainbowScreen) {
-          rainbowScreen.classList.remove("hidden");
-          rainbowScreen.style.opacity = "1";
-          rainbowScreen.style.visibility = "visible";
-          
-          // Start the rainbow sweep animation
-          rainbowOverlay.classList.add("playing");
-          
-          const handleRainbowEnd = () => {
-            rainbowScreen.classList.add("caption-active");
-            rainbowOverlay.removeEventListener("animationend", handleRainbowEnd);
-          };
-          
-          rainbowOverlay.addEventListener("animationend", handleRainbowEnd);
-          
-          // Safety fallback if animationend event doesn't fire
-          setTimeout(() => {
-            if (!rainbowScreen.classList.contains("caption-active")) {
-              handleRainbowEnd();
-            }
-          }, 3600);
-        }
-      }, "fade");
-    }, 600);
-  });
-}
-
-// Handle Page 2 -> Page 3 click transition
-if (rainbowScreen) {
-  rainbowScreen.addEventListener("click", () => {
-    // Only allow transition if the caption is fully displayed (caption-active)
-    if (rainbowScreen.classList.contains("caption-active")) {
-      transitionPages(rainbowScreen, introScreen, () => {
-        if (rainbowScreen) {
-          rainbowScreen.style.opacity = "0";
-          rainbowScreen.style.visibility = "hidden";
-          rainbowScreen.classList.add("hidden");
+          lampScreen.classList.add("hidden");
         }
         
         // Activate butterflies WebGL background
@@ -1347,7 +1308,7 @@ if (rainbowScreen) {
           introStarted = true;
           setTimeout(typeIntroText, 400);
         }
-      });
-    }
+      }, "fade");
+    }, 600);
   });
 }
