@@ -499,7 +499,7 @@ function runEmojiRain() {
 // 4. MUSIC ENGINE (HTML5 AUDIO - PLAYING LOCAL BACKGROUND.MP3 & GDRIVE PLAYLIST)
 const playlist = [
   "background.mp3",
-  "song1.mp3",
+  "https://docs.google.com/uc?export=download&id=118P6PnQTQaUlzWg0jmTXJNmiuxuAK3-j",
   "song2.mp3"
 ];
 let playlistIndex = 0;
