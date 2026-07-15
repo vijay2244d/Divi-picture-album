@@ -498,10 +498,9 @@ function runEmojiRain() {
 
 // 4. MUSIC ENGINE (HTML5 AUDIO - PLAYING LOCAL BACKGROUND.MP3 & GDRIVE PLAYLIST)
 const playlist = [
-  "akkam pakkam trimmed 2 .mp3",
-  "https://docs.google.com/uc?export=download&id=118P6PnQTQaUlzWg0jmTXJNmiuxuAK3-j",
-  "song2.mp3",
-  "background.mp3"
+  "background.mp3",
+  "song1.mp3",
+  "song2.mp3"
 ];
 let playlistIndex = 0;
 
@@ -638,7 +637,7 @@ function proceedToAlbum() {
         homeScreen.classList.remove("hidden");
         homeScreen.style.opacity = '1';
       }
-    });
+    }, "fade");
   }
 }
 
@@ -677,7 +676,7 @@ securityOptionBtns.forEach(btn => {
             envelope.classList.add("close");
           }
         }
-      });
+      }, "fade");
     }, 2800);
   });
 });
@@ -860,7 +859,7 @@ if (coverSheet) {
             trailInstance = new ImageTrailVariant7(trailContainer);
           }
         }
-      });
+      }, "fade");
     }, 1100);
   });
 }
@@ -940,7 +939,7 @@ if (btnHome) {
         homeScreen.classList.remove("hidden");
         homeScreen.style.opacity = '1';
       }
-    });
+    }, "fade");
   });
 }
 
@@ -1264,10 +1263,11 @@ if (imageModal) {
 const introLamp = document.getElementById("intro-lamp");
 const rainbowOverlay = document.getElementById("rainbow-overlay");
 const lampScreen = document.getElementById("lamp-screen");
+const rainbowScreen = document.getElementById("rainbow-screen");
 const butterfliesBg = document.getElementById("butterflies-bg");
 let introStarted = false;
 
-if (introLamp) {
+if (introLamp && rainbowOverlay) {
   introLamp.addEventListener("click", (e) => {
     e.stopPropagation();
     
@@ -1277,13 +1277,51 @@ if (introLamp) {
     // 2. Transition body to light mode
     document.body.classList.remove("dark-mode");
     
-    // 3. Transition directly from lampScreen to introScreen (Page 3)
+    // 3. Fade out Page 1 (lamp screen) and show Page 2 (rainbow screen)
     setTimeout(() => {
-      transitionPages(lampScreen, introScreen, () => {
+      transitionPages(lampScreen, rainbowScreen, () => {
         if (lampScreen) {
           lampScreen.style.opacity = "0";
           lampScreen.style.visibility = "hidden";
-          lampScreen.classList.add("hidden");
+        }
+        
+        if (rainbowScreen) {
+          rainbowScreen.classList.remove("hidden");
+          rainbowScreen.style.opacity = "1";
+          rainbowScreen.style.visibility = "visible";
+          
+          // Start the rainbow sweep animation
+          rainbowOverlay.classList.add("playing");
+          
+          const handleRainbowEnd = () => {
+            rainbowScreen.classList.add("caption-active");
+            rainbowOverlay.removeEventListener("animationend", handleRainbowEnd);
+          };
+          
+          rainbowOverlay.addEventListener("animationend", handleRainbowEnd);
+          
+          // Safety fallback if animationend event doesn't fire
+          setTimeout(() => {
+            if (!rainbowScreen.classList.contains("caption-active")) {
+              handleRainbowEnd();
+            }
+          }, 3600);
+        }
+      }, "fade");
+    }, 600);
+  });
+}
+
+// Handle Page 2 -> Page 3 click transition
+if (rainbowScreen) {
+  rainbowScreen.addEventListener("click", () => {
+    // Only allow transition if the caption is fully displayed (caption-active)
+    if (rainbowScreen.classList.contains("caption-active")) {
+      transitionPages(rainbowScreen, introScreen, () => {
+        if (rainbowScreen) {
+          rainbowScreen.style.opacity = "0";
+          rainbowScreen.style.visibility = "hidden";
+          rainbowScreen.classList.add("hidden");
         }
         
         // Activate butterflies WebGL background
@@ -1310,6 +1348,6 @@ if (introLamp) {
           setTimeout(typeIntroText, 400);
         }
       });
-    }, 600);
+    }
   });
 }
