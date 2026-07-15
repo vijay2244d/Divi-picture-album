@@ -498,9 +498,10 @@ function runEmojiRain() {
 
 // 4. MUSIC ENGINE (HTML5 AUDIO - PLAYING LOCAL BACKGROUND.MP3 & GDRIVE PLAYLIST)
 const playlist = [
-  "background.mp3",
+  "akkam pakkam trimmed 2 .mp3",
   "https://docs.google.com/uc?export=download&id=118P6PnQTQaUlzWg0jmTXJNmiuxuAK3-j",
-  "song2.mp3"
+  "song2.mp3",
+  "background.mp3"
 ];
 let playlistIndex = 0;
 
@@ -637,7 +638,7 @@ function proceedToAlbum() {
         homeScreen.classList.remove("hidden");
         homeScreen.style.opacity = '1';
       }
-    }, "fade");
+    });
   }
 }
 
@@ -676,7 +677,7 @@ securityOptionBtns.forEach(btn => {
             envelope.classList.add("close");
           }
         }
-      }, "fade");
+      });
     }, 2800);
   });
 });
@@ -859,7 +860,7 @@ if (coverSheet) {
             trailInstance = new ImageTrailVariant7(trailContainer);
           }
         }
-      }, "fade");
+      });
     }, 1100);
   });
 }
@@ -939,7 +940,7 @@ if (btnHome) {
         homeScreen.classList.remove("hidden");
         homeScreen.style.opacity = '1';
       }
-    }, "fade");
+    });
   });
 }
 
@@ -1308,7 +1309,7 @@ if (introLamp) {
           introStarted = true;
           setTimeout(typeIntroText, 400);
         }
-      }, "fade");
+      });
     }, 600);
   });
 }
