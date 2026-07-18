@@ -392,11 +392,23 @@ canvas,
   border-color: #111;
 }
 
-/* ===== SCREEN 3: Home Page (3D Book Cover) ===== */
+/* ===== SCREEN 3: Home Page (3D Book Cover + Venn Book) ===== */
 #home-screen {
   background-color: transparent;
   z-index: 15; /* Above hidden #app but below emoji canvas */
   pointer-events: auto;
+}
+
+/* Side-by-side row for both books */
+.home-books-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 80px;
+  width: 100%;
+  height: 100%;
+  flex-wrap: wrap;
+  padding: 20px;
 }
 
 .book-container {
@@ -404,8 +416,7 @@ canvas,
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
+  flex-shrink: 0;
 }
 
 .book-cover-wrapper {
@@ -573,6 +584,262 @@ canvas,
   font-size: 0.85rem;
   font-style: italic;
   font-weight: 500;
+}
+
+/* ===== CIRCULAR VENN DIAGRAM BOOK ===== */
+.circular-book-container {
+  perspective: 1600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.circular-book-wrapper {
+  width: 380px;
+  height: 380px;
+  position: relative;
+  transform-style: preserve-3d;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  animation: circularBookFloat 4s ease-in-out infinite;
+}
+
+@keyframes circularBookFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.circular-book-wrapper:hover {
+  animation-play-state: paused;
+  transform: scale(1.05);
+}
+
+.circular-book-spine {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 100%;
+  background: #111111;
+  border-radius: 20px 0 0 20px;
+  box-shadow: inset -3px 0 5px rgba(255,255,255,0.1), 3px 0 8px rgba(0,0,0,0.3);
+  z-index: 15;
+}
+
+.circular-book-cover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 1.3s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease-in-out;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.circular-book-cover.flipped {
+  transform: rotateY(-140deg);
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.circular-book-wrapper:hover .circular-book-cover:not(.flipped) {
+  transform: rotateY(-12deg);
+}
+
+.circular-cover-design {
+  background: #1a1a4e;
+  color: #ffffff;
+  border: 4px solid #1a1a4e;
+  padding: 40px;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  box-shadow: inset 0 0 35px rgba(255,255,255,0.05);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.circular-cover-design::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.circular-cover-badge {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.circular-cover-title {
+  font-family: 'Great Vibes', cursive;
+  font-size: 2.8rem;
+  font-weight: 400;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.circular-cover-divider {
+  width: 60px;
+  height: 1.5px;
+  background: #ffffff;
+  margin: 5px 0 12px;
+}
+
+.circular-cover-subtitle {
+  font-size: 1rem;
+  color: #eeeeee;
+  font-weight: 300;
+  margin-bottom: 15px;
+}
+
+.circular-cover-icon {
+  font-size: 2.5rem;
+  animation: softPulse 2.5s infinite ease-in-out;
+}
+
+.circular-book-inside {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: calc(100% - 15px);
+  height: calc(100% - 20px);
+  background: #fcfbf8;
+  border-radius: 50%;
+  border: 1px solid #e2ded5;
+  box-shadow: inset 10px 0 20px rgba(0,0,0,0.05);
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.circular-inside-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+  justify-content: center;
+  position: relative;
+}
+
+.circular-book-close-btn {
+  position: absolute;
+  top: 25px;
+  right: 30px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #666;
+  cursor: pointer;
+  z-index: 20;
+  transition: color 0.2s, transform 0.2s;
+  line-height: 1;
+}
+
+.circular-book-close-btn:hover {
+  color: var(--heart-red);
+  transform: scale(1.1);
+}
+
+.circular-inside-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: #1a1a4e;
+  margin-bottom: 2px;
+  margin-top: 10px;
+}
+
+.circular-inside-subtitle {
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 12px;
+  font-style: italic;
+  transition: color 0.3s ease;
+}
+
+.venn-interactive-container {
+  width: 70vw;
+  max-width: 850px;
+  height: auto;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 20px 50px rgba(0,0,0,0.15));
+}
+
+.venn-svg-interactive {
+  width: 100%;
+  height: auto;
+}
+
+.venn-section-group {
+  cursor: pointer;
+}
+
+.venn-part-bg {
+  transition: fill-opacity 0.3s ease, stroke-width 0.3s ease;
+  fill-opacity: 0.8;
+}
+
+.venn-section-group:hover .venn-part-bg {
+  fill-opacity: 0.95;
+  stroke-width: 3.5px;
+}
+
+.venn-part-image {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.venn-enter-album-btn {
+  background: #1a1a4e;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(26, 26, 78, 0.2);
+  margin-bottom: 10px;
+}
+
+.venn-enter-album-btn:hover {
+  background: var(--heart-red);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(26, 26, 78, 0.3);
+}
+
+/* Responsive: stack vertically on narrow screens */
+@media (max-width: 900px) {
+  .home-books-row {
+    flex-direction: column;
+    gap: 40px;
+  }
 }
 
 /* ===== SCREEN 4: FULLSCREEN POLAROID TRAIL ===== */
@@ -1407,51 +1674,15 @@ video.content__img-inner {
   color: #fff;
 }
 
-/* ===== DIAGONAL RAINBOW OVERLAY ===== */
-#rainbow-overlay {
-  position: fixed;
-  top: -100vh;
-  left: -100vw;
-  width: 300vw;
-  height: 300vh;
-  z-index: 90;
+/* ===== BEAUTIFUL RAINBOW CANVASES ===== */
+.rainbow-canvas-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
   pointer-events: none;
-  background: linear-gradient(
-    135deg,
-    transparent 42%,
-    rgba(179, 102, 255, 0.8) 45%, /* Violet */
-    rgba(92, 92, 255, 0.8) 47%,   /* Indigo */
-    rgba(51, 153, 255, 0.8) 49%,  /* Blue */
-    rgba(51, 204, 102, 0.8) 51%,  /* Green */
-    rgba(255, 255, 51, 0.8) 53%,  /* Yellow */
-    rgba(255, 153, 51, 0.8) 55%,  /* Orange */
-    rgba(255, 77, 77, 0.8) 57%,   /* Red */
-    transparent 60%
-  );
-  filter: blur(35px);
-  opacity: 0;
-  transform: translate3d(-100vw, -100vh, 0);
-}
-
-#rainbow-overlay.playing {
-  animation: rainbowSweepDiagonal 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-}
-
-@keyframes rainbowSweepDiagonal {
-  0% {
-    transform: translate3d(-100vw, -100vh, 0);
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate3d(100vw, 100vh, 0);
-    opacity: 0;
-  }
 }
 
 /* ===== NEW SEPARATE PAGES TRANSITIONS ===== */
@@ -1719,4 +1950,70 @@ video.content__img-inner {
   font-size: 5rem;
   filter: drop-shadow(0 0 25px var(--heart-red));
   animation: heartBeat 1.2s infinite cubic-bezier(0.215, 0.610, 0.355, 1);
+}
+
+/* ===== SCREEN 5: INSIDE OF CIRCULAR BOOK SCREEN ===== */
+#circle-book-screen {
+  background-color: transparent;
+  z-index: 17; /* Above home-screen when visible */
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.circle-book-inside-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
+}
+
+#circle-book-screen:not(.hidden) .circle-book-inside-wrapper {
+  transform: scale(1);
+  opacity: 1;
+}
+
+#circle-book-screen .circular-inside-title {
+  color: #111111;
+  font-size: 2.5rem;
+  text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+  margin-bottom: 5px;
+}
+
+#circle-book-screen .circular-inside-subtitle {
+  color: #333333;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 5px rgba(255,255,255,0.8);
+  margin-bottom: 25px;
+}
+
+.circle-book-close-btn {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background: #111111;
+  color: #ffffff;
+  border: none;
+  font-size: 1.4rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  line-height: 1;
+}
+
+.circle-book-close-btn:hover {
+  background-color: var(--heart-red);
+  transform: scale(1.1);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
 }

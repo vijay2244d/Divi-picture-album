@@ -385,9 +385,15 @@ function typeIntroText() {
 }
 
 // Start preloading media on load (website waits for lamp turn-on to reveal)
-window.addEventListener("DOMContentLoaded", () => {
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", () => {
+    preloadMedia();
+    initVennImages();
+  });
+} else {
   preloadMedia();
-});
+  initVennImages();
+}
 
 // 3. EMOJI RAIN ENGINE (CANVAS)
 let canvasCtx = null;
@@ -498,7 +504,7 @@ function runEmojiRain() {
 
 // 4. MUSIC ENGINE (HTML5 AUDIO - PLAYING LOCAL BACKGROUND.MP3 & GDRIVE PLAYLIST)
 const playlist = [
-  "background.mp3",
+  "song3.mp3",
   "song1.mp3",
   "song2.mp3"
 ];
@@ -637,7 +643,7 @@ function proceedToAlbum() {
         homeScreen.classList.remove("hidden");
         homeScreen.style.opacity = '1';
       }
-    }, "fade");
+    });
   }
 }
 
@@ -676,7 +682,7 @@ securityOptionBtns.forEach(btn => {
             envelope.classList.add("close");
           }
         }
-      }, "fade");
+      });
     }, 2800);
   });
 });
@@ -816,6 +822,34 @@ async function convertAndSetHeic(filename, element) {
   }
 }
 
+// Preload and convert Venn diagram images on load
+async function initVennImages() {
+  const imgCenter = document.getElementById("venn-img-center");
+  const imgRight = document.getElementById("venn-img-right");
+  if (imgCenter) imgCenter.setAttribute("href", "vendiagram%20pictures/center.jpg");
+  if (imgRight) imgRight.setAttribute("href", "vendiagram%20pictures/right%20side.jpg");
+  
+  const imgLeft = document.getElementById("venn-img-left");
+  if (imgLeft) {
+    try {
+      const response = await fetch("vendiagram%20pictures/left%20side.heic");
+      if (!response.ok) throw new Error("Venn HEIC fetch fail");
+      const blob = await response.blob();
+      const convertedBlob = await heic2any({
+        blob: blob,
+        toType: 'image/jpeg',
+        quality: 0.7
+      });
+      const finalBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      const objectUrl = URL.createObjectURL(finalBlob);
+      imgLeft.setAttribute("href", objectUrl);
+    } catch (err) {
+      console.error("Venn HEIC conversion failed, using fallback:", err);
+      imgLeft.setAttribute("href", "vendiagram%20pictures/left%20side.heic");
+    }
+  }
+}
+
 function transitionToHomeScreen() {
   if (homeScreen) {
     homeScreen.classList.remove("hidden");
@@ -859,10 +893,129 @@ if (coverSheet) {
             trailInstance = new ImageTrailVariant7(trailContainer);
           }
         }
-      }, "fade");
+      });
     }, 1100);
   });
 }
+
+// 7b. CIRCULAR BOOK CONTROLS & INTERACTIVE VENN DIAGRAM SCREEN
+const circularBook = document.getElementById("circular-book");
+const circularBookCover = document.getElementById("circular-book-cover");
+const circularBookWrapper = document.getElementById("circular-book-wrapper");
+const circleBookScreen = document.getElementById("circle-book-screen");
+const closeCircleBookScreenBtn = document.getElementById("close-circle-book-screen");
+
+// 1. Click to Open Circular Book (flips open then transitions to fullscreen screen)
+if (circularBookCover) {
+  circularBookCover.addEventListener("click", (e) => {
+    e.stopPropagation();
+    
+    // Play cover flip animation on home screen
+    circularBookCover.classList.add("flipped");
+    if (circularBookWrapper) {
+      circularBookWrapper.style.animation = "none"; // Pause float
+    }
+
+    // Wait 1.1s (flip animation duration) then transition to fullscreen inside screen
+    setTimeout(() => {
+      transitionPages(homeScreen, circleBookScreen, () => {
+        if (homeScreen) {
+          homeScreen.style.opacity = '0';
+          homeScreen.classList.add("hidden");
+        }
+        if (circleBookScreen) {
+          circleBookScreen.classList.remove("hidden");
+          circleBookScreen.style.opacity = '1';
+        }
+      });
+    }, 1100);
+  });
+}
+
+// 2. Click to Close Circular Book Screen (curtain transition back to home screen)
+if (closeCircleBookScreenBtn && circleBookScreen && homeScreen) {
+  closeCircleBookScreenBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    transitionPages(circleBookScreen, homeScreen, () => {
+      // Hide circle book inside screen
+      if (circleBookScreen) {
+        circleBookScreen.style.opacity = '0';
+        circleBookScreen.classList.add("hidden");
+      }
+      // Show home screen
+      if (homeScreen) {
+        homeScreen.classList.remove("hidden");
+        homeScreen.style.opacity = '1';
+      }
+
+      // Reset cover flip state on return
+      if (circularBookCover) {
+        circularBookCover.classList.remove("flipped");
+      }
+      if (circularBookWrapper) {
+        circularBookWrapper.style.animation = ""; // Resume floating
+      }
+
+      // Reset inside subtitle & images on exit
+      const subtitle = document.querySelector(".circular-inside-subtitle");
+      if (subtitle) {
+        subtitle.textContent = "Click each section to reveal...";
+        subtitle.style.color = "#666";
+      }
+      const images = document.querySelectorAll(".venn-part-image");
+      images.forEach(img => {
+        img.setAttribute("opacity", "0");
+      });
+    });
+  });
+}
+
+// 3. Venn Diagram Section Click to Reveal & Double-Click to Zoom
+const vennSections = document.querySelectorAll(".venn-section-group");
+vennSections.forEach(group => {
+  // Single click: Fades in the picture inside the Venn circle
+  group.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const image = group.querySelector(".venn-part-image");
+    if (image) {
+      const isRevealed = image.getAttribute("opacity") === "1";
+      if (!isRevealed) {
+        image.setAttribute("opacity", "1");
+        const subtitle = document.querySelector(".circular-inside-subtitle");
+        if (subtitle) {
+          subtitle.textContent = "Beautiful! Double-click this section to zoom.";
+          subtitle.style.color = "var(--heart-red)";
+        }
+      }
+    }
+  });
+
+  // Double click: Instantly reveals (if not yet revealed) and zoom-opens in the full screen modal
+  group.addEventListener("dblclick", (e) => {
+    e.stopPropagation();
+    const section = group.getAttribute("data-section");
+    const image = group.querySelector(".venn-part-image");
+    
+    if (image) {
+      // Force reveal on double click
+      image.setAttribute("opacity", "1");
+      
+      const imgSrc = image.getAttribute("href");
+      if (imgSrc && imageModal && modalImg) {
+        modalImg.src = imgSrc;
+        if (modalCaption) {
+          if (section === "left") modalCaption.textContent = "Us ❤️";
+          else if (section === "center") modalCaption.textContent = "Our Bond";
+          else if (section === "right") modalCaption.textContent = "Our bond";
+        }
+        imageModal.classList.remove("hidden");
+      }
+    }
+  });
+});
+
+
 
 // VIBE SELECTION HEART BUTTON HANDLERS
 const vibeSelector = document.getElementById("vibe-selector-screen");
@@ -939,7 +1092,7 @@ if (btnHome) {
         homeScreen.classList.remove("hidden");
         homeScreen.style.opacity = '1';
       }
-    }, "fade");
+    });
   });
 }
 
@@ -1261,13 +1414,12 @@ if (imageModal) {
 
 // 10. INTERACTIVE INTRO LAMP & DIAGONAL RAINBOW CONTROLLER
 const introLamp = document.getElementById("intro-lamp");
-const rainbowOverlay = document.getElementById("rainbow-overlay");
 const lampScreen = document.getElementById("lamp-screen");
 const rainbowScreen = document.getElementById("rainbow-screen");
 const butterfliesBg = document.getElementById("butterflies-bg");
 let introStarted = false;
 
-if (introLamp && rainbowOverlay) {
+if (introLamp && rainbowScreen) {
   introLamp.addEventListener("click", (e) => {
     e.stopPropagation();
     
@@ -1290,24 +1442,17 @@ if (introLamp && rainbowOverlay) {
           rainbowScreen.style.opacity = "1";
           rainbowScreen.style.visibility = "visible";
           
-          // Start the rainbow sweep animation
-          rainbowOverlay.classList.add("playing");
+          // Start the WebGL grainient animation
+          if (window.startRainbowGrainient) {
+            window.startRainbowGrainient();
+          }
           
-          const handleRainbowEnd = () => {
-            rainbowScreen.classList.add("caption-active");
-            rainbowOverlay.removeEventListener("animationend", handleRainbowEnd);
-          };
-          
-          rainbowOverlay.addEventListener("animationend", handleRainbowEnd);
-          
-          // Safety fallback if animationend event doesn't fire
+          // Show the caption after a brief delay
           setTimeout(() => {
-            if (!rainbowScreen.classList.contains("caption-active")) {
-              handleRainbowEnd();
-            }
-          }, 3600);
+            rainbowScreen.classList.add("caption-active");
+          }, 1200);
         }
-      }, "fade");
+      });
     }, 600);
   });
 }
@@ -1322,6 +1467,11 @@ if (rainbowScreen) {
           rainbowScreen.style.opacity = "0";
           rainbowScreen.style.visibility = "hidden";
           rainbowScreen.classList.add("hidden");
+        }
+        
+        // Stop the Grainient animation
+        if (window.stopRainbowGrainient) {
+          window.stopRainbowGrainient();
         }
         
         // Activate butterflies WebGL background
