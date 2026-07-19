@@ -15,7 +15,7 @@
     rel="stylesheet">
 
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="main.css?v=30">
+  <link rel="stylesheet" href="main.css?v=47">
 
   <!-- GSAP CDN for high-performance trail animations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -264,11 +264,21 @@
     <button class="circle-book-close-btn" id="close-circle-book-screen" title="Close Album">&times;</button>
     
     <div class="circle-book-inside-wrapper">
-      <h3 class="circular-inside-title">Our Story Venn Diagram</h3>
-      <p class="circular-inside-subtitle">Click each section to reveal... (Double-click to expand)</p>
       
-      <!-- The Venn Diagram SVG -->
-      <div class="venn-interactive-container">
+      <!-- Interactive Wedding Rings collision animation -->
+      <div class="wedding-container step-1" id="wedding-rings-container" style="display:flex; flex-direction:column; justify-content:center; align-items:center; cursor:pointer; background:#f5f5f7; position:relative; z-index:5;">
+        <div class="rings-wrapper">
+          <div class="html-ring ring-1"></div>
+          <div class="html-ring ring-2"></div>
+        </div>
+        <p class="instruction-text" id="wedding-instruction" style="color:#c0392b; font-family:'Great Vibes',cursive; font-size:1.6rem;">Click to Unite</p>
+      </div>
+
+      <!-- The Venn Diagram SVG (hidden initially, fades in after collision) -->
+      <div class="venn-interactive-container hidden" id="venn-diagram-content">
+        <h3 class="circular-inside-title">Our Story Venn Diagram</h3>
+        <p class="circular-inside-subtitle">Click each section to reveal... (Double-click to expand)</p>
+        
         <svg class="venn-svg-interactive" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <!-- Left Circle Clip -->
@@ -332,7 +342,7 @@
   </div>
 
   <!-- JavaScript Entry Point -->
-  <script src="main.js?v=30"></script>
+  <script src="main.js?v=47"></script>
 
   <!-- Butterflies Background Module Initialization -->
   <script type="module">

@@ -793,6 +793,7 @@ canvas,
 
 .venn-svg-interactive {
   width: 100%;
+  max-height: 55vh;
   height: auto;
 }
 
@@ -1954,7 +1955,7 @@ video.content__img-inner {
 
 /* ===== SCREEN 5: INSIDE OF CIRCULAR BOOK SCREEN ===== */
 #circle-book-screen {
-  background-color: transparent;
+  background-color: #f5f5f7;
   z-index: 17; /* Above home-screen when visible */
   pointer-events: auto;
   display: flex;
@@ -1964,13 +1965,16 @@ video.content__img-inner {
 
 .circle-book-inside-wrapper {
   width: 100%;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   position: relative;
   transform: scale(0.9);
   opacity: 0;
   transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
+  padding: 40px 20px;
 }
 
 #circle-book-screen:not(.hidden) .circle-book-inside-wrapper {
@@ -2010,10 +2014,236 @@ video.content__img-inner {
   transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   line-height: 1;
+  z-index: 25;
 }
 
 .circle-book-close-btn:hover {
   background-color: var(--heart-red);
   transform: scale(1.1);
   box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+/* ===== WEDDING RINGS COLLISION ANIMATION ===== */
+.wedding-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.wedding-container.fade-out {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+.rings-wrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 25px;
+  transition: gap 1s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+/* HTML Ring Styling */
+.html-ring {
+  width: 140px;
+  height: 140px;
+  border: 10px solid #ffff00;
+  border-radius: 50%;
+  /* Removed 3px black border */
+  box-shadow: 0 0 30px rgba(255, 255, 0, 0.8), inset 0 0 15px rgba(255, 255, 0, 0.3);
+  background: rgba(255, 255, 0, 0.15);
+  flex-shrink: 0;
+  transition: transform 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Step 1: Rings start in the corners */
+.wedding-container.step-1 .html-ring.ring-1 {
+  transform: translateX(calc(-50vw + 120px));
+}
+.wedding-container.step-1 .html-ring.ring-2 {
+  transform: translateX(calc(50vw - 120px));
+}
+
+/* Step 2: Rings travel from corners to the middle and overlap/unite with a bounce effect, then zoom into viewport */
+.wedding-container.step-2 .html-ring.ring-1 {
+  animation: collide-ring-1 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.wedding-container.step-2 .html-ring.ring-2 {
+  animation: collide-ring-2 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes collide-ring-1 {
+  0% {
+    transform: translateX(calc(-50vw + 120px)) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  32.5% {
+    /* Deep collision/overshoot (1s) */
+    transform: translateX(60px) scale(1.08);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  40% {
+    /* Rebound bounce (1.2s) */
+    transform: translateX(38px) scale(1.03);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  46% {
+    /* Minor secondary settle (1.38s) */
+    transform: translateX(47px) scale(1.06);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  50% {
+    /* Final resting overlap (1.5s) */
+    transform: translateX(45px) scale(1.05);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  66.7% {
+    /* Hold interlocked state (2.0s) */
+    transform: translateX(45px) scale(1.05);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    /* Zoom towards user (3.0s) */
+    transform: translateX(45px) scale(3.5);
+    opacity: 0;
+    filter: blur(5px);
+  }
+}
+
+@keyframes collide-ring-2 {
+  0% {
+    transform: translateX(calc(50vw - 120px)) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  32.5% {
+    /* Deep collision/overshoot (1s) */
+    transform: translateX(-60px) scale(1.08);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  40% {
+    /* Rebound bounce (1.2s) */
+    transform: translateX(-38px) scale(1.03);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  46% {
+    /* Minor secondary settle (1.38s) */
+    transform: translateX(-47px) scale(1.06);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  50% {
+    /* Final resting overlap (1.5s) */
+    transform: translateX(-45px) scale(1.05);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  66.7% {
+    /* Hold interlocked state (2.0s) */
+    transform: translateX(-45px) scale(1.05);
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    /* Zoom towards user (3.0s) */
+    transform: translateX(-45px) scale(3.5);
+    opacity: 0;
+    filter: blur(5px);
+  }
+}
+
+/* Bright yellow flash when colliding */
+.wedding-container.step-2 .rings-wrapper {
+  animation: flash-bright-html 1.5s ease-out 0.5s forwards;
+}
+
+@keyframes flash-bright-html {
+  0% {
+    filter: none;
+  }
+  33% {
+    filter: drop-shadow(0 0 35px yellow) brightness(1.7);
+    transform: scale(1.1);
+  }
+  66% {
+    filter: drop-shadow(0 0 15px yellow) brightness(1.2);
+    transform: scale(1.05);
+  }
+  100% {
+    filter: none;
+    transform: scale(1);
+  }
+}
+
+/* Fade out instruction text before 3D zoom */
+.wedding-container.step-2 .instruction-text {
+  animation: fade-out-instruction 0.8s ease-out 1.2s forwards;
+}
+
+@keyframes fade-out-instruction {
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.wedding-container .instruction-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: #111111;
+  text-shadow: 0 2px 8px rgba(255, 255, 255, 0.7);
+  margin-top: 25px;
+  letter-spacing: 2px;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+    color: var(--heart-red);
+  }
+}
+
+/* Venn Content Transition */
+#venn-diagram-content {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#venn-diagram-content.fade-in {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Hide flow elements completely when they have the hidden class so they don't affect layout/centering */
+.wedding-container.hidden {
+  display: none !important;
+}
+
+#venn-diagram-content.hidden {
+  display: none !important;
 }

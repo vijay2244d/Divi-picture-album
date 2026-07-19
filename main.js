@@ -11,6 +11,7 @@ const mediaFiles = [
   "20250907_132840.heic",
   "20251020_105541.heic",
   "20251110_202914.heic",
+  "InShot_20250915_140317301.jpg",
   "IMG-20250422-WA0003.jpg",
   "IMG-20250516-WA0008.jpg",
   "IMG-20250525-WA0009.jpg",
@@ -775,7 +776,9 @@ async function convertAndSetHeic(filename, element) {
     const response = await fetch(filePath);
     if (!response.ok) throw new Error("HEIC fetch fail");
     
-    const blob = await response.blob();
+    const arrayBuffer = await response.arrayBuffer();
+    // Force correct MIME type — static servers often serve .HEIC as application/octet-stream
+    const blob = new Blob([arrayBuffer], { type: 'image/heic' });
     
     let convertedBlob;
     try {
@@ -905,6 +908,12 @@ const circularBookWrapper = document.getElementById("circular-book-wrapper");
 const circleBookScreen = document.getElementById("circle-book-screen");
 const closeCircleBookScreenBtn = document.getElementById("close-circle-book-screen");
 
+// Wedding Rings Anim Elements
+const weddingRingsContainer = document.getElementById("wedding-rings-container");
+const weddingInstruction = document.getElementById("wedding-instruction");
+const vennDiagramContent = document.getElementById("venn-diagram-content");
+let weddingAnimationStep = 1;
+
 // 1. Click to Open Circular Book (flips open then transitions to fullscreen screen)
 if (circularBookCover) {
   circularBookCover.addEventListener("click", (e) => {
@@ -932,7 +941,36 @@ if (circularBookCover) {
   });
 }
 
-// 2. Click to Close Circular Book Screen (curtain transition back to home screen)
+// 2. Click to Unite Rings (collides and reveals Venn Diagram)
+if (weddingRingsContainer) {
+  weddingRingsContainer.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (weddingAnimationStep === 1) {
+      weddingAnimationStep = 2;
+      
+      // Merge circles
+      weddingRingsContainer.classList.remove("step-1");
+      weddingRingsContainer.classList.add("step-2");
+      
+      if (weddingInstruction) {
+        weddingInstruction.textContent = "Uniting our stories...";
+      }
+      
+      // Wait for collision, hold, and 3D zoom animations to finish (3s), then reveal Venn Diagram
+      setTimeout(() => {
+        weddingRingsContainer.classList.add("hidden");
+        if (vennDiagramContent) {
+          vennDiagramContent.classList.remove("hidden");
+          // Trigger reflow
+          void vennDiagramContent.offsetWidth;
+          vennDiagramContent.classList.add("fade-in");
+        }
+      }, 3000); // 3 seconds total animation
+    }
+  });
+}
+
+// 3. Click to Close Circular Book Screen (curtain transition back to home screen)
 if (closeCircleBookScreenBtn && circleBookScreen && homeScreen) {
   closeCircleBookScreenBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -957,10 +995,24 @@ if (closeCircleBookScreenBtn && circleBookScreen && homeScreen) {
         circularBookWrapper.style.animation = ""; // Resume floating
       }
 
+      // Reset wedding rings animation state on exit
+      weddingAnimationStep = 1;
+      if (weddingRingsContainer) {
+        weddingRingsContainer.classList.remove("step-2", "fade-out", "hidden");
+        weddingRingsContainer.classList.add("step-1");
+      }
+      if (weddingInstruction) {
+        weddingInstruction.textContent = "Click to Unite";
+      }
+      if (vennDiagramContent) {
+        vennDiagramContent.classList.add("hidden");
+        vennDiagramContent.classList.remove("fade-in");
+      }
+
       // Reset inside subtitle & images on exit
       const subtitle = document.querySelector(".circular-inside-subtitle");
       if (subtitle) {
-        subtitle.textContent = "Click each section to reveal...";
+        subtitle.textContent = "Click each section to reveal... (Double-click to expand)";
         subtitle.style.color = "#666";
       }
       const images = document.querySelectorAll(".venn-part-image");
@@ -1006,7 +1058,7 @@ vennSections.forEach(group => {
         modalImg.src = imgSrc;
         if (modalCaption) {
           if (section === "left") modalCaption.textContent = "Us ❤️";
-          else if (section === "center") modalCaption.textContent = "Our Bond";
+          else if (section === "center") modalCaption.textContent = "Our future 🩶";
           else if (section === "right") modalCaption.textContent = "Our bond";
         }
         imageModal.classList.remove("hidden");
@@ -1429,30 +1481,30 @@ if (introLamp && rainbowScreen) {
     // 2. Transition body to light mode
     document.body.classList.remove("dark-mode");
     
-    // 3. Fade out Page 1 (lamp screen) and show Page 2 (rainbow screen)
+    // 3. Smoothly cross-fade to Page 2 (rainbow screen) using GPU-accelerated CSS transitions
     setTimeout(() => {
-      transitionPages(lampScreen, rainbowScreen, () => {
-        if (lampScreen) {
-          lampScreen.style.opacity = "0";
-          lampScreen.style.visibility = "hidden";
+      if (lampScreen) {
+        lampScreen.style.opacity = "0";
+        lampScreen.style.visibility = "hidden";
+      }
+      
+      if (rainbowScreen) {
+        rainbowScreen.classList.remove("hidden");
+        // Force layout flow trigger
+        void rainbowScreen.offsetWidth;
+        rainbowScreen.style.opacity = "1";
+        rainbowScreen.style.visibility = "visible";
+        
+        // Start the WebGL grainient animation
+        if (window.startRainbowGrainient) {
+          window.startRainbowGrainient();
         }
         
-        if (rainbowScreen) {
-          rainbowScreen.classList.remove("hidden");
-          rainbowScreen.style.opacity = "1";
-          rainbowScreen.style.visibility = "visible";
-          
-          // Start the WebGL grainient animation
-          if (window.startRainbowGrainient) {
-            window.startRainbowGrainient();
-          }
-          
-          // Show the caption after a brief delay
-          setTimeout(() => {
-            rainbowScreen.classList.add("caption-active");
-          }, 1200);
-        }
-      });
+        // Show the caption after a brief delay
+        setTimeout(() => {
+          rainbowScreen.classList.add("caption-active");
+        }, 1200);
+      }
     }, 600);
   });
 }
