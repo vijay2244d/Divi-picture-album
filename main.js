@@ -385,16 +385,33 @@ function typeIntroText() {
   }
 }
 
+// Dynamic Preloading & Initialization Handler
+let appInitialized = false;
+
+async function tryInitApp() {
+  if (window.isMobileDevice) return;
+  if (appInitialized) return;
+  appInitialized = true;
+  
+  await preloadMedia();
+  await initVennImages();
+}
+
 // Start preloading media on load (website waits for lamp turn-on to reveal)
 if (document.readyState === "loading") {
   window.addEventListener("DOMContentLoaded", () => {
-    preloadMedia();
-    initVennImages();
+    tryInitApp();
   });
 } else {
-  preloadMedia();
-  initVennImages();
+  tryInitApp();
 }
+
+// Check if user resizes desktop to larger window
+window.addEventListener("resize", () => {
+  if (!window.isMobileDevice && !appInitialized) {
+    tryInitApp();
+  }
+});
 
 // 3. EMOJI RAIN ENGINE (CANVAS)
 let canvasCtx = null;
@@ -1280,6 +1297,10 @@ class ImageTrailVariant7 {
   }
 
   render() {
+    if (window.isMobileDevice) {
+      this.loopActive = false;
+      return;
+    }
     let distance = getMouseDistance(this.mousePos, this.lastMousePos);
     
     this.cacheMousePos.x = lerp(this.cacheMousePos.x, this.mousePos.x, 0.2);

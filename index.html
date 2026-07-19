@@ -22,6 +22,27 @@
 
   <!-- HEIC conversion library for Apple Photos -->
   <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+
+  <!-- Early Device/Mobile Detection -->
+  <script>
+    (function() {
+      function checkDevice() {
+        var isMobileUA = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        var isSmallScreen = window.innerWidth < 1025;
+        var isBlocked = isMobileUA || isSmallScreen;
+        
+        window.isMobileDevice = isBlocked;
+        
+        if (isBlocked) {
+          document.documentElement.classList.add('mobile-blocked');
+        } else {
+          document.documentElement.classList.remove('mobile-blocked');
+        }
+      }
+      checkDevice();
+      window.addEventListener('resize', checkDevice);
+    })();
+  </script>
 </head>
 
 <body class="dark-mode">
@@ -567,6 +588,10 @@
       let t0 = performance.now();
 
       const loop = (t) => {
+        if (window.isMobileDevice) {
+          raf = requestAnimationFrame(loop);
+          return;
+        }
         program.uniforms.iTime.value = (t - t0) * 0.001;
         renderer.render({ scene: mesh });
         raf = requestAnimationFrame(loop);
